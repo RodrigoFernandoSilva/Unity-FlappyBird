@@ -6,11 +6,14 @@ public class Pipe : MonoBehaviour
 {
     public GameObject pipe;
 
-    public float speed = 0;
+    private bool yetCount = false;
+    private float speed = 0;
 
-	// Use this for initialization
-	void Start ()
+    // Use this for initialization
+    void Start ()
     {
+        speed = GameObject.Find("Floor").GetComponent<Floor>().GetSpeed();
+
         /*
          * Como o cano de cima é o mesmo do de baixo, é necessario ver se o mesmo foi criado para ser o
          * cano de cima ou o de baixo, se ele for o de cima, sua movimentação tem que ser invertida, caso
@@ -18,6 +21,7 @@ public class Pipe : MonoBehaviour
          */
         if (transform.rotation.z != 0)
         {
+            yetCount = true;
             speed *= -1;
         }
     }
@@ -40,8 +44,22 @@ public class Pipe : MonoBehaviour
         }
 	}
 
-    public void DestroyPipe()
+    //Métodos para pegar e mudar valores desse script
+    /// <summary>
+    /// Retorna o da variável que mostra se o ponto desse cano já foi considerado
+    /// </summary>
+    /// <returns></returns>
+    public bool GetYetCount()
     {
-        Destroy(gameObject);
+        return yetCount;
+    }
+
+    /// <summary>
+    /// Muda o valor da variável que control se o ponto deste cano já foi considerado
+    /// </summary>
+    /// <param name="value"></param>
+    public void SetYetCount(bool value)
+    {
+        yetCount = value;
     }
 }

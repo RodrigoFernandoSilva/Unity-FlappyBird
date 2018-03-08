@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpwaPipes : MonoBehaviour
+public class SpawPipes : MonoBehaviour
 {
     public Random generator;
     public GameObject pipe;
@@ -17,9 +17,8 @@ public class SpwaPipes : MonoBehaviour
     // Use this for initialization
     void Start ()
     {
-        //Iguala ao máximo de tempo para o jogo já começar sumonando um cano
-        timer = maxTime;
-	}
+        SetTimerToSpaw();
+    }
 	
 	// Update is called once per frame
 	void Update ()
@@ -39,5 +38,12 @@ public class SpwaPipes : MonoBehaviour
 
             timer += 1 * Time.deltaTime;
         }
-	}
+    }
+    /// <summary>
+    /// Iguala ao máximo de tempo para o jogo já começar sumonando um cano
+    /// </summary>
+    public void SetTimerToSpaw()
+    {
+        timer = maxTime;
+    }
 }

@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Bird : MonoBehaviour
 {
+    public Text scoreGui;
     public GameObject birdObj;
     public GameObject playObj;
 
@@ -14,6 +16,7 @@ public class Bird : MonoBehaviour
     //Força que o pássaro rataciona para cima e para baixo
     public float forceRotateUp = 0;
     public float forceRotateDown = 0;
+    private int score;
 
     /*
      * Salva sé o pássaro colidio com o cano, pois após colidir com ele, o jogo tem que parar e o pássaro
@@ -33,10 +36,15 @@ public class Bird : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        birdObj.GetComponent<Rigidbody2D>().gravityScale = 0;
+        birdObj.GetComponent<Rigidbody2D>().simulated = false;
+
         initialX = birdObj.transform.position.x;
         initialY = birdObj.transform.position.y;
 
+        scoreGui.enabled = false;
         collidedPipe = false;
+        score = 0;
     }
 
     // Update is called once per frame
@@ -45,14 +53,15 @@ public class Bird : MonoBehaviour
         //Faz o pássaro pular se for apertado a tecla 'espaço' ou o botão direto do mouse
         if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
         {
-            if (!collidedPipe) {
-                isJumpping = true;
-            } else if (playObj.GetComponent<Renderer>().enabled)
-            {
+            if (playObj.GetComponent<Renderer>().enabled) {
                 RestartLevel();
+            } else if (!collidedPipe)
+            {
+                isJumpping = true;
             }
         }
 
+        UpdateScore();
         UpdateJump();
         RotateBird();
     }
@@ -77,15 +86,38 @@ public class Bird : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Contabiliza os pontos, vendo se o cano já passou pelo passaro
+    /// </summary>
+    void UpdateScore()
+    {
+        foreach (GameObject pipe in GameObject.FindGameObjectsWithTag("Pipe"))
+        {
+            if (!pipe.GetComponent<Pipe>().GetYetCount() && pipe.transform.position.x < birdObj.transform.position.x + 0.03f)
+            {
+                pipe.GetComponent<Pipe>().SetYetCount(true);
+                score++;
+            }
+        }
+
+        scoreGui.text = score.ToString();
+    }
+
     //Métodos desse usado ness escript
     /// <summary>
     /// Reseta a fase, fazendo com que tudo seja colocado no seu devido lugar
     /// </summary>
     void RestartLevel()
     {
+        foreach (GameObject pipe in GameObject.FindGameObjectsWithTag("Pipe"))
+        {
+            Destroy(pipe);
+        }
+        GameObject.Find("SpawPipe").GetComponent<SpawPipes>().SetTimerToSpaw();
         birdObj.transform.position = new Vector3(initialX, initialY, 0);
-        birdObj.transform.eulerAngles = new Vector3(0, 0, 0);
-        //GameObject.Find("Cano").GetComponent<Pipe>().DestroyPipe();
+        rotateZ = 0;
+        score = 0;
+        scoreGui.enabled = true;
         collidedPipe = false;
         isJumpping = true;
     }
@@ -98,6 +130,7 @@ public class Bird : MonoBehaviour
         if (!playObj.GetComponent<Renderer>().enabled) {
             birdObj.GetComponent<Rigidbody2D>().gravityScale = 0;
             playObj.GetComponent<Renderer>().enabled = true;
+            birdObj.GetComponent<Rigidbody2D>().simulated = false;
         }
     }
     
@@ -107,10 +140,13 @@ public class Bird : MonoBehaviour
     void UpdateJump() {
         if (isJumpping)
         {
-            birdObj.GetComponent<Rigidbody2D>().gravityScale = gravity;
-            birdObj.GetComponent<Rigidbody2D>().velocity = new Vector2(0, force);
-            playObj.GetComponent<Renderer>().enabled = false;
-            isJumpping = false;
+            if (playObj.GetComponent<Renderer>().enabled) {
+                birdObj.GetComponent<Rigidbody2D>().gravityScale = gravity;
+                birdObj.GetComponent<Rigidbody2D>().simulated = true;
+                playObj.GetComponent<Renderer>().enabled = false;
+            }
+        birdObj.GetComponent<Rigidbody2D>().velocity = new Vector2(0, force);
+        isJumpping = false;
         }
     }
 
@@ -150,7 +186,7 @@ public class Bird : MonoBehaviour
         }
     }
 
-    //Métodos para pegar valores desse script
+    //Métodos para pegar e mudar valores desse script
     /// <summary>
     /// Retorna se o jogador está jogando ou já morreu
     /// </summary>
